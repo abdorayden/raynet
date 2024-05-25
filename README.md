@@ -8,5 +8,5 @@ this tool is still under developement
 ## take a look
 
 <p align="center">
-  <img src="./pictures/img.jpg" />
+  <img src="./pictures/img.png" />
 </p>
