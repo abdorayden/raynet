@@ -2,82 +2,113 @@
     parser_flags file is part of raynet tool
 """
 
+from settings.config import *
+
+import argparse
 import sys
 
-from settings.config import info
-
-all_flags = [
-        sys.argv[0],
-        "-h",
-        "--help",
-        "-I",
-        "--ip-addr",
-        "-p",
-        "--port",
-        "-o",
-        "--out",
-        "--interface",
-        "--verbose",
-        "-v",
-        "-d",
-        "--debug",
-        "--no-banner",
-        "--module",
+def flags() -> None :
+    flag = argparse.ArgumentParser(
+    epilog=
+    f"""
+        EXAMPLE :
+           {sys.argv[0]} 10.10.10.10 --osi network --protocole arp --scan --verbose
+    """
+    )
+    flag.add_argument(
+            "target" , 
+            help = "Target IP Address or domain name"
+    )
+    Group1 = flag.add_argument_group(info("Groupe1", ret = True) ,"Informations and Default Flags" )
+    Group1.add_argument(
+            "-p" , 
+            "--port" , 
+            default = range(1,1024), 
+            type = int ,
+            metavar = 'N' , 
+            help = "Target Port"
+    )
+    Group1.add_argument(
+            "-o" , 
+            "--out" , 
+            default = "raynet.out",
+            help = "out file path"
+    )
+    Group1.add_argument(
+            "-I",
+            "--interface" , 
+            help = "interface to work with"
+    )
+    Group1.add_argument(
+            "-v",
+            "--verbose" , 
+            action='store_true', 
+            help = "enable verbose mode"
+    )
+    Group1.add_argument(
+            "-V",
+            "--version",
+            action='version', 
+            version=f'{sys.argv[0]} : {version}',
+            help = "show version"
+    )
+    Group1.add_argument(
+            "-d",
+            "--debug" , 
+            action = "store_true",
+            help = "enable debug"
+    )
+    Group1.add_argument(
+            "--no-banner" , 
+            action = "store_true",
+            help = "display banner OFF"
+    )
+    Groupe2 = flag.add_argument_group(info("Groupe2", ret = True) ,"Scanning and Enumeration" )
+    Groupe2.add_argument(
+            "-s" , 
+            "--scan" , 
+            action = "store_true",
+            help = "enable scaning"
+    ) 
+    Groupe2.add_argument(
+            "-O" , 
+            "--osi" , 
+            default = "transport.tcp",
+            help = "work with osi model"
+    ) 
+    Groupe2.add_argument(
+            "-P" , 
+            "--protocole" , 
+            help = "work with protocole"
+    ) 
+    Groupe2.add_argument(
+            "-E" , 
+            "--enum" , 
+            help = "start enumeration"
+    )
+    Groupe2.add_argument(
+            "-os" , 
+            "--op-system" , 
+            help = "operating system enumeration"
+    )
+    Groupe3 = flag.add_argument_group(info("Groupe3", ret = True) ,"Modules and External Scripts" )
+    Groupe3.add_argument(
         "-M",
+        "--module",
+        help = "use module"
+    )
+    Groupe3.add_argument(
         "--module-info",
+        help = "Display module information"
+    )
+    Groupe3.add_argument(
+        "--module-list",
+        help = "list modules"
+    )
+    Groupe3.add_argument(
         "--module-args",
-        "--scan",
-        "--scan-default",
-        "-S",
-        "--osi",
-        "-O",
-        "--protocole",
-        "-P",
-        "--enumerate",
-        "-E",
-        "--op-system",
-        "-os",
-]
+        help = "add module arguments"
+    )
+    # TODO: add flags for vulnerability scaning and Exploits 
+    return flag.parse_args()
 
-__all__ = [
-            "ParserError",
-            "Parser",
-        ]
-
-class ParserError(Exception):
-    pass
-
-class Parser(object):
-    def __init__(self, description: str = "", banner: str = "", my_own_help_msg: str = None) -> None:
-        self.args: list[str] = sys.argv
-        self.my_args: list[str] = []
-        self.banner = banner
-        self.my_help_message = my_own_help_msg
-        self.description = description
-        self.values = {}
-    def add_argument(self, *args_: tuple, help_: str = "", need_value: bool = False) -> None:
-        self.my_args.append(tuple(args_) + (help_,))
-        def decf(fn):
-            def wrapper(*ar, **kw):
-                if any(val in self.args for val in args_ if len(args_) > 1):
-                    if need_value:
-                        try :
-                            if self.args[args_.index(args_[0]) + 2].startswith("-") :
-                                raise ParserError
-                            self.values.update((_arg , self.args[args_.index(args_[0]) + 2]) for _arg in list(args_))
-                            fn( self.values[list(args_)[0]], *ar, **kw)
-                        except IndexError :
-                            raise ParserError(f"missing value for the \'{' or '.join(args_)}\' flags")
-                    else :
-                        fn(*ar, **kw)
-            return wrapper
-        return decf
-
-    def help_message(self) -> None:
-        before_message: str = f"usage : {self.args[0]} [ARGUMENTS]"
-        print(self.banner)
-        info(self.description)
-        info(before_message + "\n")
-        for *_arg, _help in self.my_args:
-            print(" , ".join(_arg), end="\t\t")
-            print(_help)

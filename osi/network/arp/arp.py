@@ -168,10 +168,13 @@ class ARP(object):
                     arp_opcode, = struct.unpack("!H", received_packet[20:22])
                     if arp_opcode == 0x0002:  # ARP reply
                         #return (self.extract_header(received_packet))
-                        self.received_packet = received_packet
+                        self.rec_packet = received_packet
                         break
         return True
     def check(self):
         return self.rec_packet is not None
+
+    def get_packet(self):
+        return self.rec_packet
 
 #ARP(operation = "REQ" , dest_ip = "192.168.0.200").connection()

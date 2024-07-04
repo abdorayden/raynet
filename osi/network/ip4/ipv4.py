@@ -10,10 +10,15 @@ try:
             Address_Block_Unkonw,
             )
 except ModuleNotFoundError :
-    from osi.network.ip4.exception import (
-            Invalid_IP_Address,
-            Address_Block_Unkonw,
-            )
+
+    class IP_Error(Exception):
+        pass
+    
+    class Invalid_IP_Address(IP_Error):
+        pass
+    
+    class Address_Block_Unkonw(Invalid_IP_Address):
+        pass
 
 def _make_ip_packet(
         ip_proto : int = None,

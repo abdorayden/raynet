@@ -7,195 +7,14 @@ from settings.config import error
 from settings.config import success
 from settings.config import info
 from settings.config import warning
-from settings.parser_flags import ParserError
-from settings.parser_flags import Parser
-from settings.parser_flags import all_flags
-#    from settings.outputfile import Out_Put
-#    #from scan import Scanner
+from settings.config import version
+from settings.parser_flags import flags
 
+from settings.outputfile import Out_Put
+#from scan import Scanner
+
+from osi.network.ip4 import IP_Address
 from osi.network.arp import arp
-
-flags = Parser(
-        description = "RayNet is network analyser and scanner and vulnerability scanner tool for penetration testing and bug hanting " , 
-        banner = Banner
-        )
-functions = []
-def parse_functions():
-    for f in sys.argv:
-        if f not in all_flags:
-            raise ParserError(f"Unkoun argument {f}")
-    for func in functions:
-        func()
-
-#Group 1
-Port = None
-IP = None 
-OutFile = None
-INterface = None
-VERBOSE = False
-DEBUG = False
-NO_BANNER = False
-#Group 2
-MODULE_INFO = None
-MODULE = None
-MODULE_ARGS = None
-#Group 3
-OSI = None
-PROTOCOLE = None
-SCAN = False
-SCAN_DEFAULT = False
-#Group 4
-ENUMERATE = None
-OS = None
-
-@flags.add_argument("-h","--help" , help_ = "Display Help menu")
-def __help_():
-    flags.help_message()
-
-@flags.add_argument("-I","--ip-addr" , help_ = "The Target IP Address" , need_value = True)
-def _ip_(target):
-    global IP
-    IP = target
-
-def is_ip():
-    if IP is not None:
-        return True 
-    else: 
-        return False
-
-@flags.add_argument("-p","--port" , help_ = "The Target Port" , need_value = True)
-def _port_(target):
-    global Port
-    Port = target
-
-def is_port():
-    if Port is not None:
-        return True 
-    else: 
-        return False
-
-@flags.add_argument("-o","--out" , help_ = "The OutPut File" , need_value = True)
-def _out_(target):
-    global OutFile
-    OutFile = target
-
-def is_out():
-    if OutFile is not None:
-        return True 
-    else: 
-        return False
-
-@flags.add_argument("--interface" , help_ = "choosing interface to work with" , need_value = True)
-def _interface_(target):
-    global INterface
-    INterface = target
-
-def is_interface():
-    if INterface is not None:
-        return True 
-    else: 
-        return False
-@flags.add_argument("-v" , "--verbose" , help_ = "Enable Verbose")
-def _verbose_():
-    global VERBOSE
-    VERBOSE = True
-
-@flags.add_argument("-d" , "--debug" , help_ = "Enable Debug")
-def _debug_():
-    global DEBUG
-    DEBUG = True
-
-
-@flags.add_argument("--no-banner" , help_ = "display banner OFF")
-def _no_banner_():
-    global NO_BANNER
-    NO_BANNER = True
-
-functions.append(__help_)
-functions.append(_ip_)
-functions.append(_port_)
-functions.append(_out_)
-functions.append(_interface_)
-functions.append(_verbose_)
-functions.append(_debug_)
-functions.append(_no_banner_)
-
-#Group 2
-@flags.add_argument("-M" , "--module" , help_ = "run module" , need_value = True)
-def _module_(target):
-    global MODULE
-    MODULE = target
-
-@flags.add_argument("--module-info" , help_ = "printing information of the module" , need_value = True)
-def _module_info_(target):
-    global MODULE_INFO
-    MODULE_INFO = target
-
-@flags.add_argument("--module-args" , help_ = "getting arguments that module needed" , need_value = True)
-def _module_args_(target):
-    global MODULE_ARGS
-    MODULE_ARGS = target
-
-functions.append(_module_)
-functions.append(_module_info_)
-functions.append(_module_args_)
-
-#Group 3
-@flags.add_argument("-S" , "--scan" , help_ = "start scaning")
-def _scan_():
-    global SCAN
-    SCAN = True
-
-@flags.add_argument("--scan-default" , help_ = "start default scan")
-def _scan_default_():
-    global SCAN_DEFAULT
-    SCAN_DEFAULT = True
-
-@flags.add_argument("-O" , "--osi" , help_ = "choose layer to work for" , need_value = True)
-def _osi_(target):
-    global OSI
-    OSI = target
-
-@flags.add_argument("-P" , "--protocole" , help_ = "choose protocole to work for" , need_value = True)
-def _protocole_(target):
-    global PROTOCOLE
-    PROTOCOLE = target
-
-functions.append(_scan_)
-functions.append(_scan_default_)
-functions.append(_osi_)
-functions.append(_protocole_)
-
-#Group 4
-@flags.add_argument("-E" , "--enumerate" , help_ = "start enumerating")
-def _enumerate_(target):
-    global ENUMERATE
-    ENUMERATE = target
-
-def is_enumerate():
-    if ENUMERATE is not None:
-        return True
-    else :
-        return False
-
-@flags.add_argument("-os","--op-system" , help_ = "enable os enumerate")
-def _os_(target):
-    global OS
-    OS = target
-
-def is_os():
-    if OS is not None:
-        return True
-    else :
-        return False
-functions.append(_enumerate_)
-functions.append(_os_)
-
-#class Group_Flag_Vulns():
-#    pass
-#
-#class Group_Flag_Exploit():
-#    pass
 
 class Main():
     def __init__(
@@ -212,6 +31,7 @@ class Main():
             output_file = None,
             interface = None
             ) -> None :
+        self.flag = flag
         self.osi = osi
         self.enum = enumerating
         self.scan = scan
@@ -223,20 +43,17 @@ class Main():
         self.protocole = protocole
         self.outfile = output_file
         self.iface = interface
-        pass
+
+    def get_target(self):
+        if self.target :
+            return self.target
+        elif self.iface and not self.target:
+            return self.iface
+        else :
+            return None
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(Banner)
-        info("Author = RayDen")
-        info("RayNet is network analyser and scanner and vulnerability scanner tool for penetration testing and bug hanting ")
-        print("\n")
-        warning("No argument !")
-        info(f"usage : {sys.argv[0]} [ARGUMENTS] use (-h or --help) flag to display help menu")
-        exit(1)
-    try :
-        parse_functions()
-    except ParserError as err:
-        print(Banner)
-        error(err)
-        exit(1)
+    print(Banner)
+    info(msg = "Author : RayDen")
+    info(msg = "Network Analyser and penetration testing tool\n")
+    arg = flags()
