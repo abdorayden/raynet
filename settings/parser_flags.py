@@ -7,8 +7,17 @@ from settings.config import *
 import argparse
 import sys
 
+class Arg_Parse_With_Err(argparse.ArgumentParser):
+    def error(self,message):
+        self.print_usage(sys.stderr)
+        err_message = error(msg = message ,ret = True)
+        self.exit(2 , err_message)
+    def format_usage(self):
+        custom_usage = info(msg = f"{sys.argv[0]} [IP/DOMAIN/TARGET] [ARGUMENTS]\n" , ret = True)
+        return custom_usage
+
 def flags() -> None :
-    flag = argparse.ArgumentParser(
+    flag = Arg_Parse_With_Err(
     epilog=
     f"""
         EXAMPLE :
@@ -23,8 +32,7 @@ def flags() -> None :
     Group1.add_argument(
             "-p" , 
             "--port" , 
-            default = range(1,1024), 
-            type = int ,
+            type = str ,
             metavar = 'N' , 
             help = "Target Port"
     )
@@ -37,6 +45,7 @@ def flags() -> None :
     Group1.add_argument(
             "-I",
             "--interface" , 
+            default = None ,
             help = "interface to work with"
     )
     Group1.add_argument(

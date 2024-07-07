@@ -13,6 +13,7 @@ class Enum_ARPacket(Base_Analyse):
         self.device_name = None
         self.src_ip = None
         self.dst_mac = None
+        self.extract_header()
 
     def get_dst_mac(self):
         return self.dst_mac
