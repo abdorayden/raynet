@@ -5,12 +5,3 @@ class ARPError(Exception):
 
 class ConnectionTimeout(ARPError):
     pass
-
-class Invalid_IP_Address(ConnectionTimeout):
-    pass
-
-class Address_Block_Unkonw(Invalid_IP_Address):
-    pass
-
-class IP_Error(Address_Block_Unkonw):
-    pass

@@ -66,8 +66,7 @@ def debug(type = None , msg : str = "" , ret = False):
 extentions = [
        "html",
        "json",
-       "txt",
-       "toml"
+       "txt"
 ]
 
 osi_map = {

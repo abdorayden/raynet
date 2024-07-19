@@ -8,6 +8,7 @@ try:
     from osi.network.ip4.exception import (
             Invalid_IP_Address,
             Address_Block_Unkonw,
+            IP_Error
             )
 except ModuleNotFoundError :
 
@@ -56,14 +57,13 @@ def _make_ip_packet(
             )
 
 class IP_Address(object):
-    def __init__(self , ip: str):
+    def __init__(self , ip: str = None):
         if ip is not None :
             self.ip = ip
         else:
             raise IP_Error("ip is None")
         self.interfaces = []
         self.is_range = "/" in ip
-        self.iface = self.get_interface()
         self.address_block = [
                     24,
                     16,

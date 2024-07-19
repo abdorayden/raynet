@@ -2,12 +2,10 @@
     Network Model Enumeration
 """
 import struct
+import binascii
 
-from Enumeration import Base_Analyse
-
-class Enum_ARPacket(Base_Analyse):
+class Enum_ARPacket():
     def __init__(self , packet) -> None : 
-        super().__init__()
         self.packet = packet
 
         self.device_name = None

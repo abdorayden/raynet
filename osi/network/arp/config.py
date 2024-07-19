@@ -18,7 +18,7 @@ OPERATION_DATA_REP = 0x0002
 #
 def _local_mac():
     mac = UUID(int=getnode()).hex[-12:]
-    return ':'.join(mac[i:i+2] for i in range(0, 12, 2))
+    return unhexlify(''.join(mac[i:i+2] for i in range(0, 12, 2)))
 
 _local_ip = inet_aton(gethostbyname(gethostname()))
 

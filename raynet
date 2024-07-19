@@ -8,6 +8,8 @@ from settings.config import success
 from settings.config import info
 from settings.config import warning
 from settings.config import version
+from settings.config import osi_map
+
 from settings.parser_flags import flags
 
 from settings.outputfile import Out_Put
@@ -15,6 +17,8 @@ from settings.outputfile import Out_Put
 
 from osi.network.ip4 import IP_Address
 from osi.network.arp import arp
+
+from Enumeration.network import Enum_ARPacket
 
 class Main_Error(Exception):
     pass
@@ -45,15 +49,9 @@ class Main():
         self.protocole = protocole
         self.outfile = output_file
         self.iface = interface
-        self.result = []
+        self.result = {}
+        self.__main()
 
-    #def __get_target(self):
-    #    if self.target :
-    #        return self.target
-    #    elif self.iface and not self.target:
-    #        return self.iface
-    #    else :
-    #        return None
     def __generate_ports(self):
         if self.ports is not None :
             if self.ports == "all":
@@ -70,9 +68,31 @@ class Main():
                 return int(self.ports)
         else :
             return list(range(1,1025))
-    def __main(self):
-        pass
 
+    def __get_osi(self):
+        osi , protocole = self.osi.split(".")
+        if all([osi , protocole]) :
+            if osi in list(osi_map.keys()) and protocole in osi_map[osi]:
+                return osi_map[osi][osi_map[osi].index(protocole)]
+            else :
+                raise Main_Error("Unknown osi layer or wrong protocole")
+        else :
+            raise Main_Error("wrong format '--osi <layer>.<protocole>'")
+
+
+    def __get_protocole(self , protocole):
+        return {
+                "arp" : arp.ARP,
+        }.get(protocole)
+
+    def __main(self):
+        if self.scan :
+            if (packet := self.__get_protocole(self.__get_osi())(
+                    interface = self.iface ,
+                    dest_ip = self.target ,
+                    _debug = self.debug
+                    ).get_packet()) is not None :
+                enumm = Enum_ARPacket(packet)
 
 if __name__ == "__main__":
     print(Banner)
@@ -93,6 +113,8 @@ if __name__ == "__main__":
                 output_file = arg.out ,
                 interface = arg.interface
         )
-    except Main_Error as err:
+    except (Main_Error , PermissionError) as err:
         error(msg = err)
+        exit(1)
+    finally :
         exit(1)

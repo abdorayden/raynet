@@ -13,9 +13,6 @@ class _Json_Out_File :
 class _Txt_Out_File :
     pass
 
-class _Toml_Out_File :
-    pass
-
 class Out_Put :
 
     def __init__(self , extention):
